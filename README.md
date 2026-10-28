@@ -6,7 +6,7 @@
 </h1>
 
 <h3 align="center">
-A Clash Meta GUI based on <a href="https://github.com/tauri-apps/tauri">Tauri</a>.
+基于 <a href="https://github.com/tauri-apps/tauri">Tauri 2</a> 与 Mihomo 的跨平台代理客户端，提供重新设计的连接、节点、订阅和活动界面。
 </h3>
 
 <p align="center">
@@ -21,13 +21,30 @@ A Clash Meta GUI based on <a href="https://github.com/tauri-apps/tauri">Tauri</a
   <a href="./README.md">简体中文</a>
 </p>
 
+## 界面改版
+
+本仓库基于 Clash Verge Rev，围绕连接状态、节点切换和流量排查重新组织界面，支持深色与浅色主题，并保留配置增强、系统代理、TUN 和诊断工具。
+
+| 界面 | 主要功能 |
+| --- | --- |
+| 连接 | 连接总开关、代理模式与接管方式切换，查看流量路径、实时流量、出口 IP 和订阅用量，快速切换节点。 |
+| 节点 | 按策略组浏览节点，搜索、排序和测速，并可切换到原有列表视图。 |
+| 订阅 | 卡片式管理订阅，查看用量与更新时间，编辑 Merge 和 Script 扩展。 |
+| 活动 | 在连接、日志和规则之间切换；查看连接详情与命中链路，复制主机名、关闭连接，或将精确域名规则写入当前订阅的规则扩展。 |
+| 搜索与命令 | 使用 `⌘K` / `Ctrl+K` 搜索节点、订阅和操作，快速跳转或执行命令。 |
+| 托盘快捷面板 | 在小窗口中切换节点与代理模式、测速、控制连接和 TUN，并打开主窗口。 |
+
 ## Preview
+
+以下为上游原版界面截图，尚未更新为本仓库的改版界面。
 
 | Dark                             | Light                             |
 | -------------------------------- | --------------------------------- |
 | ![预览](./docs/preview_dark.png) | ![预览](./docs/preview_light.png) |
 
 ## Install
+
+以下链接指向上游发行版，不包含本仓库的界面改动。体验改版请从本仓库源码构建，参见 [Development](#development) 和 [构建说明](./CONTRIBUTING.md#build-the-project)。
 
 请到发布页面下载对应的安装包：[Release page](https://github.com/clash-verge-rev/clash-verge-rev/releases)<br>
 Go to the [Release page](https://github.com/clash-verge-rev/clash-verge-rev/releases) to download the corresponding installation package<br>
@@ -82,7 +99,8 @@ Supports Windows (x64/x86), Linux (x64/arm64) and macOS 11+ (intel/apple).
 
 - 基于性能强劲的 Rust 和 Tauri 2 框架
 - 内置[Clash.Meta(mihomo)](https://github.com/MetaCubeX/mihomo)内核，并支持切换 `Alpha` 版本内核。
-- 简洁美观的用户界面，支持自定义主题颜色、代理组/托盘图标以及 `CSS Injection`。
+- 统一的深浅主题与卡片式界面，提供连接总览、节点浏览、订阅管理、活动详情、命令面板和托盘快捷控制。
+- 支持自定义主题颜色、代理组/托盘图标以及 `CSS Injection`。
 - 配置文件管理和增强（Merge 和 Script），配置文件语法提示。
 - 系统代理和守卫、`TUN(虚拟网卡)` 模式。
 - 可视化节点和规则编辑

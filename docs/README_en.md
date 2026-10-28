@@ -6,7 +6,7 @@
 </h1>
 
 <h3 align="center">
-A Clash Meta GUI built with <a href="https://github.com/tauri-apps/tauri">Tauri</a>.
+A cross-platform proxy client built with <a href="https://github.com/tauri-apps/tauri">Tauri 2</a> and Mihomo, with redesigned connection, node, profile, and activity views.
 </h3>
 
 <p align="center">
@@ -21,13 +21,30 @@ A Clash Meta GUI built with <a href="https://github.com/tauri-apps/tauri">Tauri<
   <a href="../README.md">简体中文</a>
 </p>
 
+## Interface Redesign
+
+This repository builds on Clash Verge Rev with an interface organized around connection status, node switching, and traffic inspection. It supports dark and light themes while retaining profile enhancements, system proxy controls, TUN, and diagnostic tools.
+
+| View | Features |
+| --- | --- |
+| Connection | Connect or disconnect, switch proxy and capture modes, inspect the traffic path, live traffic, exit IP, and subscription usage, and quickly switch nodes. |
+| Nodes | Browse nodes by policy group, search, sort, and test latency, or switch to the original list view. |
+| Profiles | Manage subscriptions as cards, inspect usage and update times, and edit Merge and Script extensions. |
+| Activity | Switch between connections, logs, and rules; inspect connection details and routing chains, copy hostnames, close connections, or save exact-domain rules to the active profile's rule extension. |
+| Search & commands | Use `⌘K` / `Ctrl+K` to search nodes, profiles, and actions, navigate between views, or run commands. |
+| Tray quick controls | Switch nodes and proxy modes, test latency, control the connection and TUN, and open the main window from a compact panel. |
+
 ## Preview
+
+These screenshots show the original upstream interface and have not yet been updated for this repository's redesign.
 
 | Dark                                | Light                                 |
 | ----------------------------------- | ------------------------------------- |
 | ![Dark Preview](./preview_dark.png) | ![Light Preview](./preview_light.png) |
 
 ## Install
+
+The links below point to upstream releases, which do not include this repository's interface changes. To try the redesign, build from this repository's source; see [Development](#development) and the [build instructions](../CONTRIBUTING.md#build-the-project).
 
 Visit the [Release page](https://github.com/clash-verge-rev/clash-verge-rev/releases) to download the installer that matches your platform.<br>
 We provide packages for Windows (x64/x86), Linux (x64/arm64), and macOS 10.15+ (Intel/Apple).
@@ -85,7 +102,8 @@ Join [@clash_verge_rev](https://t.me/clash_verge_re) for update announcements.
 
 - Built on high-performance Rust with the Tauri 2 framework
 - Ships with the embedded [Clash.Meta (mihomo)](https://github.com/MetaCubeX/mihomo) core and supports switching to the `Alpha` channel
-- Clean, polished UI with theme color controls, proxy group/tray icons, and `CSS Injection`
+- Consistent dark and light themes with card layouts for connections, nodes, and profiles, plus activity details, a command palette, and tray quick controls
+- Custom theme colors, proxy group/tray icons, and `CSS Injection`
 - Enhanced profile management (Merge and Script helpers) with configuration syntax hints
 - System proxy controls, guard mode, and `TUN` (virtual network adapter) support
 - Visual editors for nodes and rules

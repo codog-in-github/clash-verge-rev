@@ -90,22 +90,6 @@ export const memberDetails = (member: ResolvedProxyMember) =>
       ? member.group
       : undefined
 
-export function findCurrentGroupMember(
-  view: ProxyViewV1,
-  group: ProxyGroupView,
-): InteractableProxyMemberOccurrence | undefined {
-  if (!group.now) return undefined
-
-  for (const [memberIndex, memberRef] of group.members.entries()) {
-    const member = resolveMember(view, memberRef)
-    if (isInteractableMember(member) && member.ref.name === group.now) {
-      return { memberIndex, member }
-    }
-  }
-
-  return undefined
-}
-
 export const providerNameOf = (node: ProxyNodeView) =>
   node.source.kind === 'provider' ? node.source.providerName : undefined
 

@@ -1,4 +1,5 @@
 export const navigationItems = {
+  activity: { label: 'redesign.activity', path: '/activity' },
   home: { label: 'layout.components.navigation.tabs.home', path: '/' },
   proxies: {
     label: 'layout.components.navigation.tabs.proxies',

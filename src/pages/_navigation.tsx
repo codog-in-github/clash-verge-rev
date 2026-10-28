@@ -18,12 +18,10 @@ import SettingsSvg from '@/assets/image/itemicon/settings.svg?react'
 import UnlockSvg from '@/assets/image/itemicon/unlock.svg?react'
 
 import { navigationItems } from './_navigation-meta'
-import ConnectionsPage from './connections'
+import ActivityPage from './activity'
 import HomePage from './home'
-import LogsPage from './logs'
 import ProfilePage from './profiles'
 import ProxyPage from './proxies'
-import RulesPage from './rules'
 import SettingPage from './settings'
 import UnlockPage from './unlock'
 
@@ -35,6 +33,11 @@ type NavigationItem = {
 }
 
 export const navItems: NavigationItem[] = [
+  {
+    ...navigationItems.activity,
+    icon: [<SubjectOutlinedIcon key="mui" />, <LogsSvg key="svg" />],
+    Component: ActivityPage,
+  },
   {
     ...navigationItems.home,
     icon: [<HomeOutlinedIcon key="mui" />, <HomeSvg key="svg" />],
@@ -53,17 +56,17 @@ export const navItems: NavigationItem[] = [
   {
     ...navigationItems.connections,
     icon: [<LanguageOutlinedIcon key="mui" />, <ConnectionsSvg key="svg" />],
-    Component: ConnectionsPage,
+    Component: ActivityPage,
   },
   {
     ...navigationItems.rules,
     icon: [<ForkRightOutlinedIcon key="mui" />, <RulesSvg key="svg" />],
-    Component: RulesPage,
+    Component: ActivityPage,
   },
   {
     ...navigationItems.logs,
     icon: [<SubjectOutlinedIcon key="mui" />, <LogsSvg key="svg" />],
-    Component: LogsPage,
+    Component: ActivityPage,
   },
   {
     ...navigationItems.unlock,
@@ -76,3 +79,7 @@ export const navItems: NavigationItem[] = [
     Component: SettingPage,
   },
 ]
+
+export const primaryNavItems = ['/', '/proxies', '/activity', '/profile'].map(
+  (path) => navItems.find((item) => item.path === path)!,
+)

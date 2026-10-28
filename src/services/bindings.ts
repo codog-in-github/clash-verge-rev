@@ -136,6 +136,7 @@ export const commands = {
     __TAURI_INVOKE<string>('download_icon_cache', { url, name }),
   openDevtools: () => __TAURI_INVOKE<void>('open_devtools'),
   exitApp: () => __TAURI_INVOKE<void>('exit_app'),
+  openMainWindow: () => __TAURI_INVOKE<null>('open_main_window'),
   getNetworkInterfacesInfo: () =>
     __TAURI_INVOKE<NetworkInterfaceView[]>('get_network_interfaces_info'),
   getProfiles: () => __TAURI_INVOKE<IProfiles_Serialize>('get_profiles'),

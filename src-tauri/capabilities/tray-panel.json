@@ -1,0 +1,13 @@
+{
+  "identifier": "tray-panel",
+  "description": "Quick controls in the local tray popover",
+  "local": true,
+  "windows": ["tray-panel"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-hide",
+    "core:window:allow-set-theme",
+    "core:window:allow-set-minimizable",
+    "mihomo:default"
+  ]
+}

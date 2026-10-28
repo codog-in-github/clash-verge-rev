@@ -83,6 +83,7 @@ type LocaleModule = {
 }
 
 const STARTUP_LANGUAGE_SECTIONS = [
+  'redesign',
   'layout',
   'home',
   'shared',
@@ -116,7 +117,11 @@ const loadLanguageSections = async (
   try {
     const entries = await Promise.all(
       sections.map(async (section) => {
-        const loader = localeLoaders[language]?.[section]
+        const loader =
+          localeLoaders[language]?.[section] ??
+          (section === 'redesign'
+            ? localeLoaders[language === 'zhtw' ? 'zh' : 'en']?.[section]
+            : undefined)
         if (!loader) {
           throw new Error(
             `Locale loader not found for language "${language}" section "${section}"`,

@@ -111,10 +111,6 @@ export async function getClashInfo() {
 }
 
 // Fallback mode read independent of strict mihomo `/configs` deserialization.
-export async function getClashMode() {
-  return commands.getClashMode()
-}
-
 export async function getRuntimeConfig() {
   return (await commands.getRuntimeConfig()) as IConfigData | null
 }
@@ -341,6 +337,8 @@ export async function openDevTools() {
 export async function exitApp() {
   return commands.exitApp()
 }
+
+export const openMainWindow = () => commands.openMainWindow()
 
 export async function exportDiagnosticInfo() {
   return commands.exportDiagnosticInfo()

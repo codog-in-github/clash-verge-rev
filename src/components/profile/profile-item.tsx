@@ -3,11 +3,16 @@ import {
   CheckBoxOutlineBlankRounded,
   CheckBoxRounded,
   DragIndicatorRounded,
+  EditOutlined,
+  MoreHorizRounded,
+  RadioButtonCheckedRounded,
+  RadioButtonUncheckedRounded,
   RefreshRounded,
 } from '@mui/icons-material'
 import {
   Box,
   CircularProgress,
+  Chip,
   IconButton,
   keyframes,
   LinearProgress,
@@ -584,13 +589,6 @@ const ProfileItemBase = (props: ProfileItemProps) => {
     },
   ]
 
-  const boxStyle = {
-    height: 26,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  }
-
   const handleSaveProfileDocument = useLockFn(async () => {
     const currentValue = profileDocument.value
     const result = await mutate(() => saveProfileFile(uid!, currentValue), {
@@ -639,207 +637,209 @@ const ProfileItemBase = (props: ProfileItemProps) => {
   })
 
   return (
-    <Box ref={setElement} sx={{ position: 'relative', borderRadius: '8px' }}>
+    <Box ref={setElement} sx={{ position: 'relative' }}>
       <ProfileBox
         aria-selected={selected}
-        onClick={(e) => {
-          if (activating) {
-            e.preventDefault()
-            e.stopPropagation()
-            return
-          }
-          onSelect(false)
-        }}
         onContextMenu={(event) => {
-          const { clientX, clientY } = event
-          setPosition({ top: clientY, left: clientX })
-          setAnchorEl(event.currentTarget as HTMLElement)
+          setPosition({ top: event.clientY, left: event.clientX })
+          setAnchorEl(event.currentTarget)
           event.preventDefault()
         }}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.5,
+          flexWrap: 'wrap',
+        }}
       >
-        {activating && (
+        <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+          <IconButton
+            ref={handleRef}
+            size="small"
+            aria-label={t('redesign.reorderProfile', {
+              defaultValue: '调整订阅顺序',
+            })}
+            sx={{ cursor: 'grab', color: 'text.disabled', width: 20 }}
+          >
+            <DragIndicatorRounded fontSize="small" />
+          </IconButton>
+          <IconButton
+            aria-label={`${t('profiles.components.menu.select')} ${name}`}
+            aria-pressed={batchMode ? isSelected : selected}
+            disabled={activating}
+            onClick={() =>
+              batchMode ? onSelectionChange?.() : onSelect(false)
+            }
+            color={selected || isSelected ? 'primary' : 'default'}
+            sx={{ width: 40, height: 40 }}
+          >
+            {activating ? (
+              <CircularProgress size={20} />
+            ) : batchMode ? (
+              isSelected ? (
+                <CheckBoxRounded />
+              ) : (
+                <CheckBoxOutlineBlankRounded />
+              )
+            ) : selected ? (
+              <RadioButtonCheckedRounded />
+            ) : (
+              <RadioButtonUncheckedRounded />
+            )}
+          </IconButton>
+        </Box>
+        <Box
+          sx={{
+            flex: '1 1 180px',
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 0.75,
+          }}
+        >
           <Box
             sx={{
-              position: 'absolute',
               display: 'flex',
-              justifyContent: 'center',
+              gap: 1,
               alignItems: 'center',
-              inset: 0,
-              borderRadius: 'inherit',
-              zIndex: 10,
-              backdropFilter: 'blur(2px)',
-              backgroundColor: 'rgba(0, 0, 0, 0.1)',
+              flexWrap: 'wrap',
             }}
           >
-            <CircularProgress
-              color="inherit"
-              size={20}
-              sx={{
-                animation: 'pulse 1.5s ease-in-out infinite',
-              }}
-            />
-          </Box>
-        )}
-        <Box sx={{ position: 'relative' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'start' }}>
-            {batchMode && (
-              <IconButton
-                size="small"
-                sx={{ padding: '2px', marginRight: '4px', marginLeft: '-8px' }}
-                onClick={(e) => {
-                  e.stopPropagation()
-                  if (onSelectionChange) {
-                    onSelectionChange()
-                  }
-                }}
-              >
-                {isSelected ? (
-                  <CheckBoxRounded color="primary" />
-                ) : (
-                  <CheckBoxOutlineBlankRounded />
-                )}
-              </IconButton>
-            )}
-            <Box
-              ref={handleRef}
-              sx={{
-                display: 'flex',
-                margin: 'auto 0',
-                ...(batchMode && { marginLeft: '-4px' }),
-              }}
-            >
-              <DragIndicatorRounded
-                sx={[
-                  { cursor: 'move', marginLeft: '-6px' },
-                  ({ palette: { text } }) => {
-                    return { color: text.primary }
-                  },
-                ]}
-              />
-            </Box>
-
             <Typography
-              sx={{
-                width: batchMode ? 'calc(100% - 56px)' : 'calc(100% - 36px)',
-                fontSize: '18px',
-                fontWeight: '600',
-                lineHeight: '26px',
-              }}
-              variant="h6"
               component="h2"
               noWrap
-              title={name!}
+              title={name ?? undefined}
+              sx={{ fontSize: 15, fontWeight: 600, maxWidth: '100%' }}
             >
               {name}
             </Typography>
-          </Box>
-
-          {hasUrl && (
-            <IconButton
-              title={t('shared.actions.refresh')}
-              sx={{
-                position: 'absolute',
-                p: '3px',
-                top: -1,
-                right: -5,
-                animation: loading ? `1s linear infinite ${round}` : 'none',
-              }}
+            {selected && (
+              <Chip
+                size="small"
+                color="primary"
+                variant="outlined"
+                label={t('redesign.activeProfile', { defaultValue: '使用中' })}
+                sx={{ height: 20, fontSize: 11, borderRadius: '6px' }}
+              />
+            )}
+            <Chip
               size="small"
-              color="inherit"
-              disabled={loading}
-              onClick={(e) => {
-                e.stopPropagation()
-                if (activating || loading) {
-                  return
-                }
-                onUpdate(1)
-              }}
+              label={
+                hasUrl
+                  ? t('redesign.remoteProfile', { defaultValue: '远程' })
+                  : t('redesign.localProfile', { defaultValue: '本地' })
+              }
+              sx={{ height: 20, fontSize: 11, borderRadius: '6px' }}
+            />
+          </Box>
+          {(description || hasUrl) && (
+            <Typography
+              noWrap
+              title={description || from}
+              sx={{ fontSize: 12 }}
             >
-              <RefreshRounded color="inherit" />
-            </IconButton>
+              {description || from}
+            </Typography>
+          )}
+          <Box
+            sx={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: 1,
+              alignItems: 'center',
+              fontSize: 12,
+            }}
+          >
+            {hasExtra && (
+              <>
+                <span title={t('shared.labels.usedTotal')}>
+                  {parseTraffic(upload + download)} / {parseTraffic(total)}
+                </span>
+                <span title={t('shared.labels.expireTime')}>{expire}</span>
+              </>
+            )}
+            {hasUrl ? (
+              <Box
+                component="button"
+                onClick={toggleUpdateTimeDisplay}
+                title={
+                  showNextUpdate
+                    ? t('profiles.components.profileItem.tooltips.showLast')
+                    : t('profiles.components.profileItem.tooltips.showNext')
+                }
+                sx={{
+                  background: 'none',
+                  border: 0,
+                  p: 0,
+                  color: 'inherit',
+                  font: 'inherit',
+                  cursor: 'pointer',
+                }}
+              >
+                {showNextUpdate
+                  ? nextUpdateTime
+                  : (updated ?? 0) > 0
+                    ? `${t('shared.labels.updateAt')} ${dayjs((updated ?? 0) * 1000).fromNow()}`
+                    : '—'}
+              </Box>
+            ) : (
+              <span>{parseExpire(updated ?? 0)}</span>
+            )}
+          </Box>
+          {hasExtra && total > 0 && (
+            <LinearProgress
+              variant="determinate"
+              value={progress}
+              color={progress > 70 ? 'warning' : 'primary'}
+              sx={{ height: 6, borderRadius: 3, maxWidth: 360, mt: 0.5 }}
+            />
           )}
         </Box>
-        <Box sx={boxStyle}>
-          {
-            <>
-              {description ? (
-                <Typography
-                  noWrap
-                  title={description}
-                  sx={{ fontSize: '14px' }}
-                >
-                  {description}
-                </Typography>
-              ) : (
-                hasUrl && (
-                  <Typography
-                    noWrap
-                    title={`${t('shared.labels.from')} ${from}`}
-                  >
-                    {from}
-                  </Typography>
-                )
-              )}
-              {hasUrl && (
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'flex-end',
-                    ml: 'auto',
-                  }}
-                >
-                  <Typography
-                    noWrap
-                    component="span"
-                    title={
-                      showNextUpdate
-                        ? t('profiles.components.profileItem.tooltips.showLast')
-                        : `${t('shared.labels.updateTime')}: ${parseExpire(updated!)}\n${t('profiles.components.profileItem.tooltips.showNext')}`
-                    }
-                    sx={{
-                      fontSize: 14,
-                      textAlign: 'right',
-                      cursor: 'pointer',
-                      display: 'inline-block',
-                      borderBottom: '1px dashed transparent',
-                      transition: 'all 0.2s',
-                      '&:hover': {
-                        borderBottomColor: 'primary.main',
-                        color: 'primary.main',
-                      },
-                    }}
-                    onClick={toggleUpdateTimeDisplay}
-                  >
-                    {showNextUpdate
-                      ? nextUpdateTime
-                      : updated! > 0
-                        ? dayjs(updated! * 1000).fromNow()
-                        : ''}
-                  </Typography>
-                </Box>
-              )}
-            </>
-          }
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 0.75,
+            ml: 'auto',
+            '& .MuiIconButton-root': {
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: '10px',
+              width: 36,
+              height: 36,
+            },
+          }}
+        >
+          {hasUrl && (
+            <IconButton
+              aria-label={`${t('shared.actions.refresh')} ${name}`}
+              disabled={loading || activating}
+              onClick={() => onUpdate(1)}
+              sx={{
+                '& svg': {
+                  animation: loading ? `1s linear infinite ${round}` : 'none',
+                },
+              }}
+            >
+              <RefreshRounded fontSize="small" />
+            </IconButton>
+          )}
+          <IconButton
+            aria-label={`${t('shared.actions.edit')} ${name}`}
+            onClick={onEditInfo}
+          >
+            <EditOutlined fontSize="small" />
+          </IconButton>
+          <IconButton
+            aria-label={t('redesign.moreActions', { defaultValue: '更多操作' })}
+            onClick={(event) => {
+              const rect = event.currentTarget.getBoundingClientRect()
+              setPosition({ top: rect.bottom, left: rect.left })
+              setAnchorEl(event.currentTarget)
+            }}
+          >
+            <MoreHorizRounded fontSize="small" />
+          </IconButton>
         </Box>
-        {hasExtra ? (
-          <Box sx={{ ...boxStyle, fontSize: 14 }}>
-            <span title={t('shared.labels.usedTotal')}>
-              {parseTraffic(upload + download)} / {parseTraffic(total)}
-            </span>
-            <span title={t('shared.labels.expireTime')}>{expire}</span>
-          </Box>
-        ) : (
-          <Box sx={{ ...boxStyle, fontSize: 12, justifyContent: 'flex-end' }}>
-            <span title={t('shared.labels.updateTime')}>
-              {parseExpire(updated!)}
-            </span>
-          </Box>
-        )}
-        <LinearProgress
-          variant="determinate"
-          value={progress}
-          style={{ opacity: total > 0 ? 1 : 0 }}
-        />
       </ProfileBox>
 
       <Menu

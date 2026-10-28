@@ -32,6 +32,7 @@ import {
 } from '@/types/proxy-view'
 import { debugLog } from '@/utils/debug'
 
+import { NodeBrowser } from './node-browser'
 import { ProxyEmptyState } from './proxy-empty-state'
 import {
   resolveEmptyListReason,
@@ -67,6 +68,7 @@ function useStableCallback<T extends (...args: any[]) => any>(fn: T): T {
 
 interface Props {
   mode: string
+  legacyView?: boolean
   isChainMode?: boolean
   chainConfigData?: string | null
   onExitChainMode: () => void
@@ -621,7 +623,13 @@ function NormalProxyGroups(props: { mode: string }) {
 }
 
 export const ProxyGroups = (props: Props) => {
-  const { mode, isChainMode = false, chainConfigData, onExitChainMode } = props
+  const {
+    mode,
+    legacyView = false,
+    isChainMode = false,
+    chainConfigData,
+    onExitChainMode,
+  } = props
   const { profiles, isLoading: isProfilesLoading } = useProfiles()
   const { isProxyViewPending } = useProxiesData()
   const { isRunningModePending } = useSystemData()
@@ -648,8 +656,10 @@ export const ProxyGroups = (props: Props) => {
           chainConfigData={chainConfigData}
           onExitChainMode={onExitChainMode}
         />
-      ) : (
+      ) : legacyView ? (
         <NormalProxyGroups mode={mode} />
+      ) : (
+        <NodeBrowser mode={mode} />
       )
   }
 }

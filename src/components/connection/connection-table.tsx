@@ -245,6 +245,7 @@ const renderCell = (
 }
 
 interface RowComponentProps {
+  selected: boolean
   row: IConnectionsItem
   columns: DisplayColumn[]
   onShowDetail: (id: string) => void
@@ -256,6 +257,7 @@ interface RowComponentProps {
 const RowComponent = memo(
   function RowComponent({
     row,
+    selected,
     columns,
     onShowDetail,
     getSnapshot,
@@ -279,6 +281,16 @@ const RowComponent = memo(
           height: ROW_HEIGHT,
           cursor: 'pointer',
           borderBottom: `1px solid ${borderColor}`,
+          background: selected ? 'var(--background-color-alpha)' : undefined,
+        }}
+        role="button"
+        tabIndex={0}
+        aria-pressed={selected}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            handleClick()
+          }
         }}
         onClick={handleClick}
       >
@@ -309,6 +321,7 @@ const RowComponent = memo(
   },
   (prev, next) =>
     prev.row === next.row &&
+    prev.selected === next.selected &&
     prev.columns === next.columns &&
     prev.virtualTop === next.virtualTop &&
     prev.onShowDetail === next.onShowDetail &&
@@ -317,6 +330,7 @@ const RowComponent = memo(
 )
 
 interface Props {
+  selectedId?: string
   connections: IConnectionsItem[]
   onShowDetail: (id: string) => void
   columnManagerOpen: boolean
@@ -326,6 +340,7 @@ interface Props {
 export const ConnectionTable = (props: Props) => {
   const {
     connections,
+    selectedId,
     onShowDetail: rawOnShowDetail,
     columnManagerOpen,
     onCloseColumnManager,
@@ -872,6 +887,7 @@ export const ConnectionTable = (props: Props) => {
                     <RowComponent
                       key={row.id}
                       row={row}
+                      selected={row.id === selectedId}
                       columns={visibleColumns}
                       onShowDetail={onShowDetail}
                       getSnapshot={getRowSnapshot}

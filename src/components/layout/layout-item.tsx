@@ -6,7 +6,12 @@ import {
   ListItemText,
 } from '@mui/material'
 import type { ReactNode } from 'react'
-import { useMatch, useNavigate, useResolvedPath } from 'react-router'
+import {
+  useLocation,
+  useMatch,
+  useNavigate,
+  useResolvedPath,
+} from 'react-router'
 
 import type { SortableItemRenderProps } from '@/components/base/sortable-item'
 import { useVerge } from '@/hooks/use-verge'
@@ -25,6 +30,11 @@ export const LayoutItem = (props: Props) => {
   const resolved = useResolvedPath(to)
   const match = useMatch({ path: resolved.pathname, end: true })
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  const selected =
+    !!match ||
+    (to === '/activity' &&
+      ['/connections', '/logs', '/rules'].includes(pathname))
 
   const effectiveMenuIcon =
     navCollapsed && menu_icon === 'disable' ? 'monochrome' : menu_icon
@@ -37,7 +47,8 @@ export const LayoutItem = (props: Props) => {
     >
       <ListItemButton
         ref={sortable?.handleRef}
-        selected={!!match}
+        selected={selected}
+        aria-current={selected ? 'page' : undefined}
         sx={[
           {
             borderRadius: 2,
@@ -48,14 +59,14 @@ export const LayoutItem = (props: Props) => {
             cursor: 'pointer',
             '& .MuiListItemText-primary': {
               color: 'text.primary',
-              fontWeight: '700',
+              fontWeight: selected ? 600 : 400,
             },
           },
           ({ palette: { mode, primary } }) => {
             const bgcolor =
               mode === 'light'
                 ? alpha(primary.main, 0.15)
-                : alpha(primary.main, 0.35)
+                : alpha(primary.main, 0.08)
             const color = mode === 'light' ? '#1f1f1f' : '#ffffff'
             return {
               '&.Mui-selected': { bgcolor },
@@ -71,8 +82,9 @@ export const LayoutItem = (props: Props) => {
         {(effectiveMenuIcon === 'monochrome' || !effectiveMenuIcon) && (
           <ListItemIcon
             sx={{
-              color: 'text.primary',
-              marginLeft: '6px',
+              marginLeft: 0,
+              minWidth: 30,
+              color: selected ? 'primary.main' : 'text.secondary',
               cursor: 'inherit',
             }}
           >
@@ -84,8 +96,8 @@ export const LayoutItem = (props: Props) => {
         )}
         <ListItemText
           sx={{
-            textAlign: 'center',
-            marginLeft: effectiveMenuIcon === 'disable' ? '' : '-35px',
+            textAlign: 'left',
+            marginLeft: 0,
           }}
           primary={children}
         />

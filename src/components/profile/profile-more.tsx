@@ -1,4 +1,4 @@
-import { FeaturedPlayListRounded } from '@mui/icons-material'
+import { EditOutlined, FeaturedPlayListRounded } from '@mui/icons-material'
 import {
   Box,
   Badge,
@@ -155,6 +155,13 @@ export const ProfileMore = (props: Props) => {
         </Box>
 
         <Box sx={boxStyle}>
+          <IconButton
+            size="small"
+            aria-label={t('shared.actions.edit')}
+            onClick={onEditFile}
+          >
+            <EditOutlined fontSize="small" />
+          </IconButton>
           {id === 'Script' &&
             (hasError ? (
               <Badge color="error" variant="dot" overlap="circular">

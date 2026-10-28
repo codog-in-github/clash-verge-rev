@@ -1,5 +1,6 @@
 import { DragDropProvider, KeyboardSensor, PointerSensor } from '@dnd-kit/react'
-import { Box, List, Menu, MenuItem, SvgIcon } from '@mui/material'
+import SearchRounded from '@mui/icons-material/SearchRounded'
+import { Box, Button, List, Menu, MenuItem, SvgIcon } from '@mui/material'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -8,7 +9,7 @@ import iconLight from '@/assets/image/icon_light.svg?react'
 import LogoSvg from '@/assets/image/logo.svg?react'
 import { useVerge } from '@/hooks/use-verge'
 import { useNavMenuOrder } from '@/pages/_layout/hooks'
-import { navItems } from '@/pages/_navigation'
+import { navItems, primaryNavItems } from '@/pages/_navigation'
 
 import { SortableItem } from '../base'
 
@@ -21,12 +22,13 @@ type MenuContextPosition = { top: number; left: number }
 interface LayoutSidebarProps {
   isDark: boolean
   isCollapsed: boolean
+  onOpenCommands: () => void
 }
 
 const SENSORS = [PointerSensor, KeyboardSensor]
 
 export const LayoutSidebar = (props: LayoutSidebarProps) => {
-  const { isDark, isCollapsed } = props
+  const { isDark, isCollapsed, onOpenCommands } = props
   const { t } = useTranslation()
   const { verge, mutateVerge, patchVerge } = useVerge()
   const [menuUnlocked, setMenuUnlocked] = useState(false)
@@ -56,7 +58,7 @@ export const LayoutSidebar = (props: LayoutSidebarProps) => {
     resetMenuOrder,
   } = useNavMenuOrder({
     enabled: menuUnlocked,
-    items: navItems,
+    items: primaryNavItems,
     storedOrder: verge?.menu_order,
     onOptimisticUpdate: handleMenuOrderOptimisticUpdate,
     onPersist: handleMenuOrderPersist,
@@ -105,7 +107,13 @@ export const LayoutSidebar = (props: LayoutSidebarProps) => {
     if (!menuUnlocked) {
       return (
         <LayoutItem key={item.path} to={item.path} icon={item.icon}>
-          {t(item.label)}
+          {item.path === '/'
+            ? t('redesign.connection')
+            : item.path === '/proxies'
+              ? t('redesign.nodes')
+              : item.path === '/profile'
+                ? t('profiles.page.title')
+                : t(item.label)}
         </LayoutItem>
       )
     }
@@ -114,7 +122,13 @@ export const LayoutSidebar = (props: LayoutSidebarProps) => {
       <SortableItem key={item.path} id={item.path} index={index}>
         {(sortable) => (
           <LayoutItem to={item.path} icon={item.icon} sortable={sortable}>
-            {t(item.label)}
+            {item.path === '/'
+              ? t('redesign.connection')
+              : item.path === '/proxies'
+                ? t('redesign.nodes')
+                : item.path === '/profile'
+                  ? t('profiles.page.title')
+                  : t(item.label)}
           </LayoutItem>
         )}
       </SortableItem>
@@ -179,6 +193,53 @@ export const LayoutSidebar = (props: LayoutSidebarProps) => {
           {navMenuItems}
         </DragDropProvider>
       </List>
+
+      <Box
+        className="sidebar-utilities"
+        sx={{ px: isCollapsed ? 0 : 1.5, pb: 1 }}
+      >
+        <Button
+          fullWidth
+          variant="outlined"
+          startIcon={<SearchRounded />}
+          onClick={onOpenCommands}
+          aria-label={t('redesign.commands')}
+          sx={{
+            color: 'text.secondary',
+            borderColor: 'divider',
+            justifyContent: isCollapsed ? 'center' : 'flex-start',
+            minWidth: 0,
+            px: isCollapsed ? 0 : 1.5,
+            '& .MuiButton-startIcon': isCollapsed ? { m: 0 } : undefined,
+          }}
+        >
+          {!isCollapsed && (
+            <>
+              {t('redesign.commands')}
+              <Box component="kbd" sx={{ ml: 'auto', fontSize: 11 }}>
+                ⌘K
+              </Box>
+            </>
+          )}
+        </Button>
+        <List disablePadding>
+          {navItems
+            .filter(
+              (item) => item.path === '/settings' || item.path === '/unlock',
+            )
+            .map((item) => (
+              <LayoutItem key={item.path} to={item.path} icon={item.icon}>
+                {item.path === '/'
+                  ? t('redesign.connection')
+                  : item.path === '/proxies'
+                    ? t('redesign.nodes')
+                    : item.path === '/profile'
+                      ? t('profiles.page.title')
+                      : t(item.label)}
+              </LayoutItem>
+            ))}
+        </List>
+      </Box>
 
       {/* Context menu */}
       <Menu

@@ -608,6 +608,97 @@ export interface TranslationResources {
         }
       }
     }
+    redesign: {
+      activeProfile: string
+      activity: string
+      addRule: string
+      allNodes: string
+      block: string
+      captureActive: string
+      captureInactive: string
+      captureMode: string
+      checkingIp: string
+      commands: string
+      connect: string
+      connected: string
+      connection: string
+      connectionDetails: string
+      copyHost: string
+      diagnostics: string
+      disconnect: string
+      disconnected: string
+      exitIp: string
+      futureHostRoute: string
+      globalExtensions: string
+      globalExtensionsHint: string
+      hideIp: string
+      ipUnavailable: string
+      liveTraffic: string
+      localProfile: string
+      moreActions: string
+      nodes: string
+      noProfile: string
+      noUsage: string
+      palette: {
+        actions: string
+        choose: string
+        empty: string
+        execute: string
+        groups: string
+        navigation: string
+        placeholder: string
+        refine: string
+        results: string
+        search: string
+        switchMode: string
+        test: string
+        title: string
+        toggleSystemProxy: string
+        toggleTun: string
+        updateProfiles: string
+      }
+      profileChanged: string
+      proxyMode: string
+      quickNodes: string
+      recheckIp: string
+      remoteProfile: string
+      reorderProfile: string
+      routeReason: string
+      rulePersistence: string
+      ruleSavedNotApplied: string
+      ruleTarget: string
+      ruleUnavailable: string
+      searchNodes: string
+      selectConnection: string
+      showIp: string
+      sortDefault: string
+      sortDelay: string
+      sortNodes: string
+      subscriptionUsage: string
+      testGroup: string
+      trafficPath: string
+      trafficUnavailable: string
+      tray: {
+        connected: string
+        connection: string
+        direct: string
+        directHint: string
+        disconnected: string
+        empty: string
+        global: string
+        openMain: string
+        proxyGroup: string
+        proxyMode: string
+        quit: string
+        rule: string
+        selectNode: string
+        selectOutbound: string
+        testLatency: string
+        timeout: string
+        tun: string
+      }
+      trayQuickControls: string
+    }
     rules: {
       feedback: {
         notifications: {
@@ -1589,6 +1680,7 @@ export interface TranslationResources {
           noDisney: string
           originalsOnly: string
           pending: string
+          risky: string
           unsupportedRegion: string
           yes: string
         }

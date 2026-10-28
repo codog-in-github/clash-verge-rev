@@ -1,11 +1,12 @@
 import { Paper, ThemeProvider } from '@mui/material'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Outlet, useNavigate } from 'react-router'
 
 import { BaseErrorBoundary } from '@/components/base'
+import { CommandPalette } from '@/components/layout/command-palette'
 import { LayoutSidebar } from '@/components/layout/layout-sidebar'
 import { NoticeManager } from '@/components/layout/notice-manager'
 import { ServiceMigrationDialog } from '@/components/layout/service-migration-dialog'
@@ -36,6 +37,21 @@ dayjs.extend(relativeTime)
 const OS = getSystem()
 
 const Layout = () => {
+  const [commandsOpen, setCommandsOpen] = useState(false)
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.key.toLowerCase() === 'k' &&
+        !event.isComposing
+      ) {
+        event.preventDefault()
+        setCommandsOpen((open) => !open)
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [])
   const mode = useThemeMode()
   const isDark = mode !== 'light'
   const { t } = useTranslation()
@@ -106,6 +122,10 @@ const Layout = () => {
 
   return (
     <ThemeProvider theme={theme}>
+      <CommandPalette
+        open={commandsOpen}
+        onClose={() => setCommandsOpen(false)}
+      />
       {/* 左侧底部窗口控制按钮 */}
       <NoticeManager position={verge?.notice_position} />
       <ServiceMigrationDialog />
@@ -160,7 +180,11 @@ const Layout = () => {
         {customTitlebar}
 
         <div className="layout-content">
-          <LayoutSidebar isDark={isDark} isCollapsed={navCollapsed} />
+          <LayoutSidebar
+            isDark={isDark}
+            isCollapsed={navCollapsed}
+            onOpenCommands={() => setCommandsOpen(true)}
+          />
 
           <div className="layout-content__right">
             <div className="the-bar"></div>

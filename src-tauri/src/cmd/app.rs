@@ -50,6 +50,18 @@ pub async fn exit_app() {
 
 #[tauri::command]
 #[specta::specta]
+pub async fn open_main_window() -> CmdResult<()> {
+    use crate::utils::window_manager::{WindowManager, WindowOperationResult};
+    if !crate::core::lightweight::exit_lightweight_mode().await
+        && WindowManager::show_main_window().await == WindowOperationResult::Failed
+    {
+        return Err("Failed to open main window".into());
+    }
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
 pub async fn restart_app() -> CmdResult<()> {
     feat::restart_app().await;
     Ok(())

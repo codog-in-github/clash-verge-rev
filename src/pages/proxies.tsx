@@ -1,5 +1,11 @@
-import { LanOutlined, LanRounded, WarningRounded } from '@mui/icons-material'
-import { Box, Button, ButtonGroup, Typography } from '@mui/material'
+import {
+  GridViewRounded,
+  LanOutlined,
+  LanRounded,
+  ViewListRounded,
+  WarningRounded,
+} from '@mui/icons-material'
+import { Box, Button, ButtonGroup, IconButton, Typography } from '@mui/material'
 import { useLockFn } from 'ahooks'
 import { useCallback, useEffect, useReducer, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -28,6 +34,7 @@ const isMode = (value: unknown): value is Mode =>
 
 const ProxyPage = () => {
   const { t } = useTranslation()
+  const [legacyView, setLegacyView] = useState(false)
 
   // 从 localStorage 恢复链式代理按钮状态
   const [isChainMode, setIsChainMode] = useState(() => {
@@ -163,11 +170,28 @@ const ProxyPage = () => {
             />
           </Box>
         ) : (
-          t('proxies.page.title.default')
+          t('redesign.nodes', { defaultValue: '节点' })
         )
       }
       header={
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            flexWrap: 'wrap',
+          }}
+        >
+          {!isChainMode && (
+            <IconButton
+              aria-label={t('shared.actions.listView')}
+              title={t('shared.actions.listView')}
+              aria-pressed={legacyView}
+              onClick={() => setLegacyView((value) => !value)}
+            >
+              {legacyView ? <GridViewRounded /> : <ViewListRounded />}
+            </IconButton>
+          )}
           <ProviderButton />
 
           <ButtonGroup size="small">
@@ -203,6 +227,7 @@ const ProxyPage = () => {
     >
       <ProxyGroups
         mode={curMode ?? 'rule'}
+        legacyView={legacyView}
         isChainMode={isChainMode}
         chainConfigData={chainConfigData}
         onExitChainMode={onExitChainMode}

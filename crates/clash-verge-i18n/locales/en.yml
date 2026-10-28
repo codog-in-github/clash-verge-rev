@@ -60,6 +60,7 @@ launchGuard:
   move: Move
   ok: OK
 tray:
+  quickControls: Quick controls
   dashboard: Dashboard
   ruleMode: Rule Mode
   globalMode: Global Mode

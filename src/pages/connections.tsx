@@ -1,5 +1,7 @@
 import {
   DeleteForeverRounded,
+  PauseRounded,
+  PlayArrowRounded,
   TableChartRounded,
   TableRowsRounded,
   ViewColumnRounded,
@@ -13,6 +15,8 @@ import {
   MenuItem,
   Tooltip,
   Zoom,
+  Typography,
+  useMediaQuery,
 } from '@mui/material'
 import { useLockFn } from 'ahooks'
 import { useCallback, useMemo, useRef, useState } from 'react'
@@ -31,6 +35,7 @@ import {
   ConnectionDetail,
   ConnectionDetailRef,
 } from '@/components/connection/connection-detail'
+import { ConnectionInspector } from '@/components/connection/connection-inspector'
 import { ConnectionRowItem } from '@/components/connection/connection-row-item'
 import {
   getConnectionStartTime,
@@ -83,6 +88,9 @@ const EMPTY_CONNECTIONS: IConnectionsItem[] = []
 const ConnectionsPage = () => {
   const { t } = useTranslation()
   const pageVisible = useVisibility()
+  const wide = useMediaQuery('(min-width: 1100px)')
+  const [selectedConnection, setSelectedConnection] =
+    useState<IConnectionsItem | null>(null)
   const [match, setMatch] = useState<(input: string) => boolean>(
     () => () => true,
   )
@@ -100,6 +108,22 @@ const ConnectionsPage = () => {
     response: { data: traffic },
   } = useTrafficData({ enabled: pageVisible })
 
+  const [pausedSnapshot, setPausedSnapshot] = useState<
+    typeof connections | null
+  >(null)
+  const visibleConnections = pausedSnapshot ?? connections
+  const activeDetail =
+    selectedConnection &&
+    visibleConnections?.activeConnections.find(
+      ({ id }) => id === selectedConnection.id,
+    )
+  const closedDetail =
+    selectedConnection &&
+    visibleConnections?.closedConnections.find(
+      ({ id }) => id === selectedConnection.id,
+    )
+  const detail = activeDetail || closedDetail || selectedConnection
+  const detailClosed = !activeDetail
   const [setting, setSetting] = useConnectionSetting()
 
   const isTableLayout = setting.layout === 'table'
@@ -108,8 +132,8 @@ const ConnectionsPage = () => {
 
   const selectedConnections =
     connectionsType === 'active'
-      ? (connections?.activeConnections ?? EMPTY_CONNECTIONS)
-      : (connections?.closedConnections ?? EMPTY_CONNECTIONS)
+      ? (visibleConnections?.activeConnections ?? EMPTY_CONNECTIONS)
+      : (visibleConnections?.closedConnections ?? EMPTY_CONNECTIONS)
 
   const filterConn = useMemo(() => {
     const orderFunc = orderFunctionMap[curOrderOpt]
@@ -120,7 +144,12 @@ const ConnectionsPage = () => {
     const matchConns = selectedConnections.filter((conn) => {
       const { host, destinationIP, process } = conn.metadata
       return (
-        match(host || '') || match(destinationIP || '') || match(process || '')
+        match(host || '') ||
+        match(destinationIP || '') ||
+        match(process || '') ||
+        match(conn.rule) ||
+        match(conn.rulePayload ?? '') ||
+        match(conn.chains.join(' '))
       )
     })
 
@@ -137,6 +166,7 @@ const ConnectionsPage = () => {
     (type: 'active' | 'closed') => {
       if (type === connectionsType) return
       detailRef.current?.close()
+      setSelectedConnection(null)
       setIsColumnManagerOpen(false)
       setConnectionsType(type)
     },
@@ -147,10 +177,12 @@ const ConnectionsPage = () => {
     (id: string) => {
       const connection = filterConn.find((item) => item.id === id)
       if (connection) {
-        detailRef.current?.open(connection, connectionsType === 'closed')
+        setSelectedConnection(connection)
+        if (!wide)
+          detailRef.current?.open(connection, connectionsType === 'closed')
       }
     },
-    [connectionsType, filterConn],
+    [connectionsType, filterConn, wide],
   )
 
   const onCloseAll = useLockFn(() =>
@@ -228,6 +260,7 @@ const ConnectionsPage = () => {
           display: 'flex',
           alignItems: 'center',
           gap: 1,
+          flexWrap: 'wrap',
           userSelect: 'text',
           position: 'sticky',
           top: 0,
@@ -241,7 +274,7 @@ const ConnectionsPage = () => {
             onClick={() => selectConnectionsType('active')}
           >
             {t('connections.components.actions.active')}{' '}
-            {connections?.activeConnections.length}
+            {visibleConnections?.activeConnections.length}
           </Button>
           <Button
             size="small"
@@ -249,7 +282,7 @@ const ConnectionsPage = () => {
             onClick={() => selectConnectionsType('closed')}
           >
             {t('connections.components.actions.closed')}{' '}
-            {connections?.closedConnections.length}
+            {visibleConnections?.closedConnections.length}
           </Button>
         </ButtonGroup>
         {!isTableLayout && (
@@ -276,6 +309,19 @@ const ConnectionsPage = () => {
         >
           <BaseSearchBox onSearch={handleSearch} />
         </Box>
+        <IconButton
+          aria-label={t(
+            pausedSnapshot ? 'shared.actions.resume' : 'shared.actions.pause',
+          )}
+          title={t(
+            pausedSnapshot ? 'shared.actions.resume' : 'shared.actions.pause',
+          )}
+          onClick={() =>
+            setPausedSnapshot((current) => (current ? null : connections))
+          }
+        >
+          {pausedSnapshot ? <PlayArrowRounded /> : <PauseRounded />}
+        </IconButton>
         {isTableLayout && hasTableData && (
           <Tooltip title={t('connections.components.columnManager.title')}>
             <IconButton
@@ -290,35 +336,88 @@ const ConnectionsPage = () => {
         )}
       </Box>
 
-      {!hasTableData ? (
-        <BaseEmpty />
-      ) : isTableLayout ? (
-        <ConnectionTable
-          connections={filterConn}
-          onShowDetail={showDetailById}
-          columnManagerOpen={isColumnManagerOpen}
-          onCloseColumnManager={() => setIsColumnManagerOpen(false)}
-        />
-      ) : (
-        <VirtualList
-          key={connectionsType}
-          count={displayRows.length}
-          estimateSize={56}
-          renderItem={(i) => (
-            <ConnectionRowItem
-              row={displayRows[i]}
-              closed={connectionsType === 'closed'}
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          display: 'flex',
+          gap: 2.25,
+          p: { xs: 1.25, md: 2.5 },
+          pt: 1.5,
+        }}
+      >
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: '16px',
+          }}
+        >
+          {!hasTableData ? (
+            <BaseEmpty />
+          ) : isTableLayout ? (
+            <ConnectionTable
+              connections={filterConn}
               onShowDetail={showDetailById}
+              selectedId={selectedConnection?.id}
+              columnManagerOpen={isColumnManagerOpen}
+              onCloseColumnManager={() => setIsColumnManagerOpen(false)}
+            />
+          ) : (
+            <VirtualList
+              key={connectionsType}
+              count={displayRows.length}
+              estimateSize={56}
+              renderItem={(i) => (
+                <ConnectionRowItem
+                  row={displayRows[i]}
+                  selected={displayRows[i].id === selectedConnection?.id}
+                  closed={connectionsType === 'closed'}
+                  onShowDetail={showDetailById}
+                />
+              )}
+              style={{
+                flex: 1,
+                borderRadius: '8px',
+                WebkitOverflowScrolling: 'touch',
+                overscrollBehavior: 'contain',
+              }}
             />
           )}
-          style={{
-            flex: 1,
-            borderRadius: '8px',
-            WebkitOverflowScrolling: 'touch',
-            overscrollBehavior: 'contain',
-          }}
-        />
-      )}
+        </Box>
+        {wide && (
+          <Box
+            sx={{
+              flex: '0 0 320px',
+              minHeight: 0,
+              overflowY: 'auto',
+              bgcolor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'divider',
+              borderRadius: '16px',
+            }}
+          >
+            {detail ? (
+              <ConnectionInspector
+                key={detail.id}
+                data={detail}
+                closed={detailClosed}
+                onClose={() => setSelectedConnection(null)}
+              />
+            ) : (
+              <Typography color="text.secondary" sx={{ p: 2.5, fontSize: 13 }}>
+                {t('redesign.selectConnection')}
+              </Typography>
+            )}
+          </Box>
+        )}
+      </Box>
       <ConnectionDetail ref={detailRef} />
       <Zoom
         in={connectionsType === 'closed' && filterConn.length > 0}
@@ -333,7 +432,13 @@ const ConnectionsPage = () => {
             bottom: isTableLayout ? 70 : 16,
           }}
           color="primary"
-          onClick={() => clearClosedConnections()}
+          onClick={() => {
+            clearClosedConnections()
+            setPausedSnapshot((current) =>
+              current ? { ...current, closedConnections: [] } : null,
+            )
+            setSelectedConnection(null)
+          }}
         >
           <DeleteForeverRounded sx={{ mr: 1 }} fontSize="small" />
           {t('shared.actions.clear')}

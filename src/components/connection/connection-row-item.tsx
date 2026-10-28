@@ -11,6 +11,7 @@ import type { ConnectionRowView } from './connection-row-view'
 interface Props {
   row: ConnectionRowView
   closed: boolean
+  selected?: boolean
   onShowDetail: (id: string) => void
 }
 
@@ -70,7 +71,12 @@ const actionStyle = {
 } as const
 
 export const ConnectionRowItem = memo(
-  function ConnectionRowItem({ row, closed, onShowDetail }: Props) {
+  function ConnectionRowItem({
+    row,
+    closed,
+    selected = false,
+    onShowDetail,
+  }: Props) {
     const { t } = useTranslation()
     const onDelete = useLockFn(async () => closeConnection(row.id))
     const handleShowDetail = useCallback(
@@ -80,8 +86,25 @@ export const ConnectionRowItem = memo(
     const showTraffic = row.uploadSpeed >= 100 || row.downloadSpeed >= 100
 
     return (
-      <div style={itemStyle}>
-        <div style={contentStyle} onClick={handleShowDetail}>
+      <div
+        style={{
+          ...itemStyle,
+          background: selected ? 'var(--background-color-alpha)' : undefined,
+        }}
+      >
+        <div
+          role="button"
+          tabIndex={0}
+          aria-pressed={selected}
+          style={contentStyle}
+          onClick={handleShowDetail}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault()
+              handleShowDetail()
+            }
+          }}
+        >
           <div style={primaryStyle}>{row.host}</div>
           <div style={tagsStyle}>
             <span style={tagStyle}>{row.network}</span>
@@ -116,5 +139,6 @@ export const ConnectionRowItem = memo(
   (prev, next) =>
     prev.row === next.row &&
     prev.closed === next.closed &&
+    prev.selected === next.selected &&
     prev.onShowDetail === next.onShowDetail,
 )

@@ -280,7 +280,7 @@
         display: none !important;
       }
 
-      > .MuiBox-root {
+      > .MuiBox-root:not(.sidebar-utilities) {
         display: none !important;
       }
 
@@ -312,7 +312,7 @@
         display: none !important;
       }
 
-      .the-menu {
+      .the-menu, .sidebar-utilities > .MuiList-root {
         width: var(--layout-nav-collapsed-width) !important;
         overflow-x: hidden;
 

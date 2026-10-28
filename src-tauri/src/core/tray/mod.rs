@@ -29,6 +29,7 @@ use tauri::{
 };
 
 mod menu_def;
+mod panel;
 #[cfg(target_os = "macos")]
 mod speed_task;
 use menu_def::{MenuIds, MenuTexts};
@@ -174,7 +175,7 @@ impl Tray {
 
         let app_handle = handle::Handle::app_handle();
         let tray_event = { Config::verge().await.latest_arc().tray_event.clone() };
-        let tray_event = TrayAction::from(tray_event.as_deref().unwrap_or("main_window"));
+        let tray_event = TrayAction::from(tray_event.as_deref().unwrap_or("quick_controls"));
         let tray = app_handle
             .tray_by_id(TRAY_ID)
             .ok_or_else(|| anyhow::anyhow!("Failed to get main tray"))?;
@@ -662,6 +663,14 @@ async fn create_tray_menu(
         hotkeys.get("open_or_close_dashboard").copied(),
     )?;
 
+    let quick_controls = &MenuItem::with_id(
+        app_handle,
+        MenuIds::QUICK_CONTROLS,
+        &texts.quick_controls,
+        true,
+        None::<&str>,
+    )?;
+
     let rule_mode = &CheckMenuItem::with_id(
         app_handle,
         MenuIds::RULE_MODE,
@@ -828,7 +837,7 @@ async fn create_tray_menu(
 
     let separator = &PredefinedMenuItem::separator(app_handle)?;
 
-    let mut menu_items: Vec<&dyn IsMenuItem<Wry>> = vec![open_window, separator];
+    let mut menu_items: Vec<&dyn IsMenuItem<Wry>> = vec![open_window, quick_controls, separator];
 
     if show_outbound_modes_inline {
         menu_items.extend_from_slice(&[
@@ -879,6 +888,7 @@ fn on_tray_icon_event(_tray_icon: &TrayIcon, tray_event: TrayIconEvent) {
     if let TrayIconEvent::Click {
         button: MouseButton::Left,
         button_state: MouseButtonState::Down,
+        rect,
         ..
     } = tray_event
     {
@@ -887,9 +897,9 @@ fn on_tray_icon_event(_tray_icon: &TrayIcon, tray_event: TrayIconEvent) {
             return;
         }
 
-        AsyncHandler::spawn(|| async move {
+        AsyncHandler::spawn(move || async move {
             let verge = Config::verge().await.data_arc();
-            let verge_tray_event = verge.tray_event.clone().unwrap_or_else(|| "main_window".into());
+            let verge_tray_event = verge.tray_event.clone().unwrap_or_else(|| "quick_controls".into());
             let verge_tray_action = TrayAction::from(verge_tray_event.as_str());
             logging!(debug, Type::Tray, "tray event: {verge_tray_action:?}");
             match verge_tray_action {
@@ -903,6 +913,9 @@ fn on_tray_icon_event(_tray_icon: &TrayIcon, tray_event: TrayIconEvent) {
                     if !lightweight::exit_lightweight_mode().await {
                         WindowManager::show_main_window().await;
                     };
+                }
+                TrayAction::QuickControls => {
+                    logging_error!(Type::Tray, panel::toggle(rect, verge.theme_mode.as_deref()));
                 }
                 // tray_menu 模式下菜单由系统原生展示（见 set_show_menu_on_left_click），
                 // 左键点击事件无需额外处理
@@ -935,6 +948,10 @@ fn on_menu_event(_: &AppHandle, event: MenuEvent) {
                 if !lightweight::exit_lightweight_mode().await {
                     WindowManager::show_main_window().await;
                 };
+            }
+            MenuIds::QUICK_CONTROLS => {
+                let verge = Config::verge().await.data_arc();
+                logging_error!(Type::Tray, panel::toggle_from_menu(verge.theme_mode.as_deref()));
             }
             MenuIds::SYSTEM_PROXY => {
                 let _ = feat::toggle_system_proxy().await;

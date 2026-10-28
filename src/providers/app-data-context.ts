@@ -77,6 +77,3 @@ export const useSystemData = (): SystemContextType =>
 
 export const useAppRefreshers = (): RefreshersContextType =>
   useCtx(RefreshersContext, 'useAppRefreshers')
-
-export const useCoreDataStatus = (): CoreDataStatusContextType =>
-  useCtx(CoreDataStatusContext, 'useCoreDataStatus')
